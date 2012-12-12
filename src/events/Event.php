@@ -12,6 +12,9 @@ namespace ci_ext\events;
  * @version $id$
  */
 class Event extends \ci_ext\core\Object {
+
+	const AFTER_CONSTRUCT = 'afterConstruct';
+	
 	public $target;
 	public $params = array();
 	

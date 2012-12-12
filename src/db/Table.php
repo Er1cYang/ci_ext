@@ -1,10 +1,8 @@
 <?php
 namespace ci_ext\db;
 
-use ci_ext\db\CommandBuilder;
-use ci_ext\events\ModelEvent;
 use ci_ext\core\Exception;
-use ci_ext\core\DbException;
+use ci_ext\events\Event;
 
 /**
  * TableRecord
@@ -48,9 +46,15 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @param string $scenario
 	 */
 	public function __construct($scenario=self::SCENARIO_INSERT) {
+		if($scenario===null) {
+			return;
+		}
 		$this->setScenario($scenario);
 		$this->setIsNewRecord(true);
 		$this->loadDefaultAttributes();
+		$this->init();
+		$this->attachBehaviors($this->behaviors());
+		$this->afterConstruct();
 	}
 	
 	/**
@@ -170,6 +174,14 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return array
 	 */
 	public function relations() {
+		return array();
+	}
+	
+	/**
+	 * 预装载的behaviors
+	 * @return array
+	 */
+	public function behaviors() {
 		return array();
 	}
 	
@@ -588,7 +600,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 				}
 			}
 			$record->_pk=$record->getPrimaryKey();
-			// $record->attachBehaviors($record->behaviors());
+			$record->attachBehaviors($record->behaviors());
 			if($callAfterFind) {
 				$record->afterFind();
 			}
@@ -712,7 +724,13 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return boolean
 	 */
 	protected function beforeSave() {
-		return true;
+		if($this->hasEventListener(TableEvent::BEFORE_SAVE)) {
+			$event = new TableEvent($this);
+			$this->dispatchEvent(TableEvent::BEFORE_SAVE, $event);
+			return $event->isValid;
+		} else {
+			return true;
+		}
 	}
 	
 	/**
@@ -720,6 +738,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return void
 	 */
 	protected function afterSave() {
+		$this->dispatchEvent(TableEvent::AFTER_SAVE, new Event($this));
 	}
 	
 	/**
@@ -727,7 +746,13 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return boolean
 	 */
 	protected function beforeValidate() {
-		return true;
+		if($this->hasEventListener(TableEvent::BEFORE_VALIDATE)) {
+			$event = new TableEvent($this);
+			$this->dispatchEvent(TableEvent::BEFORE_VALIDATE, $event);
+			return $event->isValid;
+		} else {
+			return true;
+		}
 	}
 	
 	/**
@@ -735,6 +760,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return void
 	 */
 	protected function afterValidate() {
+		$this->dispatchEvent(TableEvent::AFTER_VALIDATE, new Event($this));
 	}
 	
 	/**
@@ -742,7 +768,13 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return boolean
 	 */
 	protected function beforeDelete() {
-		return true;
+		if($this->hasEventListener(TableEvent::BEFORE_DELETE)) {
+			$event = new TableEvent($this);
+			$this->dispatchEvent(TableEvent::BEFORE_DELETE, $event);
+			return $event->isValid;
+		} else {
+			return true;
+		}
 	}
 	
 	/**
@@ -750,6 +782,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return void
 	 */
 	protected function afterDelete() {
+		$this->dispatchEvent(TableEvent::AFTER_DELETE, new Event($this));
 	}
 	
 	/**
@@ -757,6 +790,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return void
 	 */
 	protected function beforeFind() {
+		$this->dispatchEvent(TableEvent::BEFORE_FIND, new Event($this));
 	}
 	
 	/**
@@ -764,6 +798,15 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return void
 	 */
 	protected function afterFind() {
+		$this->dispatchEvent(TableEvent::AFTER_FIND, new Event($this));
+	}
+	
+	/**
+	 * 触发事件afterConstruct
+	 * @return void
+	 */
+	protected function afterConstruct() {
+		$this->dispatchEvent(Event::AFTER_CONSTRUCT, new Event($this));
 	}
 	
 	

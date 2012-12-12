@@ -1,6 +1,6 @@
 <?php
 namespace ci_ext\db;
-use ci_ext\core\DbException;
+use ci_ext\db\DbException;
 /**
  * CommandBuilder
  * ==============================================

@@ -1,5 +1,5 @@
 <?php
-namespace ci_ext\core;
+namespace ci_ext\db;
 /**
  * DbException
  * ==============================================
@@ -11,7 +11,7 @@ namespace ci_ext\core;
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-class DbException extends Exception {
+class DbException extends \ci_ext\core\Exception {
 
 }
 
