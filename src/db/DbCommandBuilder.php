@@ -12,7 +12,7 @@ use ci_ext\db\DbException;
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-class CommandBuilder extends \ci_ext\core\Object {
+class DbCommandBuilder extends \ci_ext\core\Object {
 	
 	const PARAM_PREFIX=':cip';
 
@@ -40,10 +40,6 @@ class CommandBuilder extends \ci_ext\core\Object {
 		return "`$name`";
 	}
 	
-	public function getColumnNames($table) {
-		return $this->getDbConnection()->list_fields($table);
-	}
-	
 	public function quoteColumnName($name) {
 		return "`$name`";
 	}
@@ -67,13 +63,6 @@ class CommandBuilder extends \ci_ext\core\Object {
 			$alias=$criteria->alias;
 		$alias=$this->quoteTableName($alias);
 
-		if($select==='*' && !empty($criteria->join)) {
-			$prefix=$alias.'.';
-			$select=array();
-			foreach($this->getColumnNames($table) as $name)
-				$select[]=$prefix.$this->quoteColumnName($name);
-			$select=implode(', ',$select);
-		}
 		$tableRawName = $this->getTableRawName($table);
 		$sql=($criteria->distinct ? 'SELECT DISTINCT':'SELECT')." {$select} FROM {$tableRawName} $alias";
 		$sql=$this->applyJoin($sql,$criteria->join);
@@ -446,9 +435,9 @@ class CommandBuilder extends \ci_ext\core\Object {
 	
 	protected function ensureTable($table) {
 		$tables = $this->getDbConnection()->list_tables();
-		if(!in_array($table, $tables)) {
+		/*if(!in_array($table, $tables)) {
 			throw new DbException('yii','Table "'.$table.'" does not exist.');
-		}
+		}*/
 	}
 	
 }

@@ -20,6 +20,7 @@ class CodeIgniter_Extension {
 	 * @return void
 	 */
 	public static function setup() {
+		define('ID_DEV_MODE', in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', '::1')) ? 'local' : 'remote');
 		spl_autoload_register(array('CodeIgniter_Extension', 'autoload'));
 	}
 	
@@ -36,5 +37,5 @@ class CodeIgniter_Extension {
 	}
 	
 }
-
+CodeIgniter_Extension::setup();
 ?>

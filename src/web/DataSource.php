@@ -4,7 +4,7 @@ namespace ci_ext\web;
 class DataSource extends \ci_ext\core\Object {
 	
 	private $_data;
-	private $_page;
+	private $_pagination;
 	private $_keys;
 
 	public function __construct($config=array()) {
@@ -27,15 +27,15 @@ class DataSource extends \ci_ext\core\Object {
 		$this->_data = $data;
 	}
 	
-	public function getPage() {
-		if(!$this->_page) {
-			$this->_page = new Page();
+	public function getPagination() {
+		if(!$this->_) {
+			$this->_pagination = new Pagination();
 		}
-		return $this->_page;
+		return $this->_pagination;
 	}
 	
-	public function setPage($page) {
-		$this->_page = $page;
+	public function setPagination($pagination) {
+		$this->_pagination = $pagination;
 	}
 	
 	protected function fetchKeys() {

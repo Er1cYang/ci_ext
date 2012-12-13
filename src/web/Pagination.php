@@ -1,7 +1,7 @@
 <?php
 namespace ci_ext\web;
 
-class Page extends \ci_ext\core\Object {
+class Pagination extends \ci_ext\core\Object {
 	const DEFAULT_PAGE_VAR = 'page';
 	const DEFAULT_PAGE_SIZE = 1;
 	public $pageSize = self::DEFAULT_PAGE_SIZE;

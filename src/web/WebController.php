@@ -14,7 +14,7 @@ use ci_ext\utils\FileHelper;
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-class CI_E_Controller extends \CI_Controller {
+class WebController extends \CI_Controller {
 	
 	private $_js;
 	private $_css;
@@ -28,6 +28,7 @@ class CI_E_Controller extends \CI_Controller {
 		parent::__construct();
 		$this->_js = new ArrayList();
 		$this->_css = new ArrayList();
+		$this->load->helper('url');
 		$this->init();
 	}
 	
@@ -42,7 +43,7 @@ class CI_E_Controller extends \CI_Controller {
 	 * @return string
 	 */
 	public function getBaseUrl() {
-		return '/zswidgets/demo';
+		return base_url();
 	}
 	
 	/**

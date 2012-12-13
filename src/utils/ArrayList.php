@@ -15,6 +15,10 @@ class ArrayList extends \ci_ext\core\Object implements \ArrayAccess, \Countable,
 	
 	private $_d = array();
 	
+	public function add($element) {
+		array_push($this->_d, $element);
+	}
+	
 	public function push($element) {
 		array_push($this->_d, $element);
 	}

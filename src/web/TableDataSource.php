@@ -23,7 +23,7 @@ class TableDataSource extends DataSource {
 	}
 	protected function fetchData() {
 		$criteria = new DbCriteria();
-		$page = $this->page;
+		$page = $this->pagination;
 		$criteria->limit = $page->pageSize;
 		$criteria->offset = ($page->getCurrentPage()-1)*$page->pageSize;
 		$data = $this->_table->findAll($criteria);
