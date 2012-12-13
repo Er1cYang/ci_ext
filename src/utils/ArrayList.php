@@ -80,6 +80,10 @@ class ArrayList extends \ci_ext\core\Object implements \ArrayAccess, \Countable,
 		return $this;
 	}
 	
+	public function contain($element) {
+		return in_array($element, $this->_d);
+	}
+	
 	public function indexOf($index) {
 		return $this->offsetGet($index);
 	}
