@@ -1,6 +1,6 @@
 <?php
 /**
- * CodeIgniter_Extension
+ * CI_Ext
  * <pre>
  * 基于CodeIgniter框架的扩展代码库
  * </pre>
@@ -13,7 +13,17 @@
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-class CodeIgniter_Extension {
+class CI_Ext {
+	
+	private static $_tData;
+	
+	/**
+	 * 返回项目编码
+	 * Enter description here ...
+	 */
+	public static function charset() {
+		return 'utf-8';
+	}
 	
 	/**
 	 * 初始化扩展
@@ -21,7 +31,7 @@ class CodeIgniter_Extension {
 	 */
 	public static function setup() {
 		define('ID_DEV_MODE', in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', '::1')) ? 'local' : 'remote');
-		spl_autoload_register(array('CodeIgniter_Extension', 'autoload'));
+		spl_autoload_register(array('CI_Ext', 'autoload'));
 	}
 	
 	/**
@@ -36,6 +46,22 @@ class CodeIgniter_Extension {
 		}
 	}
 	
+	/**
+	 * 转换字符串占位符
+	 * @param string $message
+	 * @param array $params
+	 * @return string
+	 */
+	public static function t($category, $message) {
+		if(!self::$_tData) {
+			self::$_tData = include dirname(__FILE__).'/message/'.$category.'.php';
+		}
+		if(isset(self::$_tData[$message])) {
+			$message = self::$_tData[$message];
+		}
+		return $message;
+	}
+	
 }
-CodeIgniter_Extension::setup();
+CI_Ext::setup();
 ?>

@@ -425,7 +425,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @param array $attributes
 	 * @return boolean
 	 */
-	public function save($runValidation=true,$attributes=array()) {
+	public function save($runValidation=true,$attributes=null) {
 		if(!$runValidation || $this->validate($attributes))
 			return $this->getIsNewRecord() ? $this->insert($attributes) : $this->update($attributes);
 		else
