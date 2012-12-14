@@ -4,7 +4,6 @@ namespace ci_ext\db;
 
 use ci_ext\core\Exception;
 use ci_ext\events\Event;
-use ci_ext\utils\ArrayList;
 use ci_ext\validators\Validator;
 /**
  * TableRecord
@@ -20,8 +19,9 @@ use ci_ext\validators\Validator;
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-abstract class Table extends \ci_ext\events\EventDispatcher {
+abstract class Table extends \ci_ext\core\Model {
 	
+	/* 未实现 */
 	const HAS_MANY = '';					// 一对多
 	const HAS_ONE = '';						// 一对一
 	const MANY_MANY = '';					// 多对多
@@ -29,7 +29,8 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	
 	const SCENARIO_INSERT = 'insert';		// 插入
 	const SCENARIO_UPDATE = 'update';		// 更新
-
+	
+	/* 未实现 */
 	const CASCADE_ALL = 7;					// 全部级联
 	const CASCADE_DELETE = 4;				// 级联删除
 	const CASCADE_VALIDATE = 2;				// 级联验证
@@ -102,23 +103,6 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	}
 	
 	/**
-	 * 设置当前场景
-	 * @param string $scenario
-	 * @return void
-	 */
-	public function setScenario($scenario) {
-		$this->_scenario = $scenario;
-	}
-	
-	/**
-	 * 获取当前场景
-	 * @return string
-	 */
-	public function getScenario() {
-		return $this->_scenario;
-	}
-	
-	/**
 	 * 获取数据库连接
 	 * 如果不存在，就使用$this->load->database()加载数据库
 	 * @return CI_DB_driver
@@ -148,9 +132,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 */
 	public function setAttributes(array $values) {
 		foreach($values as $k=>$v) {
-			if(property_exists($this, $k) || isset($this->_attributes[$k])) {
-				$this->$k = $v;
-			}
+			$this->$k = $v;
 		}
 	}
 	
@@ -160,7 +142,7 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 * @return array
 	 */
 	public function getAttributes($attributes=null) {
-		return $this->_attributes;
+		return is_array($attributes) ? array_intersect($this->_attributes, $attributes) : $this->_attributes;
 	}
 	
 	/**
@@ -224,26 +206,10 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	}
 	
 	/**
-	 * 验证规则
-	 * @return array
-	 */
-	public function rules() {
-		return array();
-	}
-	
-	/**
 	 * 模型关系
 	 * @return array
 	 */
 	public function relations() {
-		return array();
-	}
-	
-	/**
-	 * 预装载的behaviors
-	 * @return array
-	 */
-	public function behaviors() {
 		return array();
 	}
 	
@@ -254,170 +220,6 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	public function attributeNames() {
 		return array();
 	}
-	
-	/**
-	 * 验证
-	 * @param array $attributes
-	 * @param boolean $clearErrors
-	 * @return boolean
-	 */
-	public function validate($attributes=null, $clearErrors=true) {
-		if($clearErrors) {
-			$this->clearErrors();
-		} if($this->beforeValidate()) {
-			foreach($this->getValidators() as $validator) {
-				$validator->validate($this,$attributes);
-			}
-			$this->afterValidate();
-			return !$this->hasErrors();
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * 清除错误
-	 * @param mixed $attribute
-	 * @return void
-	 */
-	public function clearErrors($attribute=null) {
-		if($attribute===null) {
-			$this->_errors=array();
-		} else {
-			unset($this->_errors[$attribute]);
-		}
-	}
-	
-	/**
-	 * 是否包含某字段的错误
-	 * @param string $attribute
-	 * @return boolean
-	 */
-	public function hasErrors($attribute=null) {
-		if($attribute===null)
-			return $this->_errors!==array();
-		else
-			return isset($this->_errors[$attribute]);
-	}
-	
-	/**
-	 * 获取错误信息
-	 * @param array $attribute
-	 * @return array
-	 */
-	public function getErrors($attribute=null) {
-		if($attribute===null)
-			return $this->_errors;
-		else
-			return isset($this->_errors[$attribute]) ? $this->_errors[$attribute] : array();
-	}
-	
-	/**
-	 * 获取错误信息
-	 * @param array $attribute
-	 * @return array
-	 */
-	public function getError($attribute) {
-		return isset($this->_errors[$attribute]) ? reset($this->_errors[$attribute]) : null;
-	}
-	
-	/**
-	 * 添加某属性的错误
-	 * @param string $attribute
-	 * @param string $error
-	 * @return void
-	 */
-	public function addError($attribute,$error) {
-		$this->_errors[$attribute][]=$error;
-	}
-	
-	/**
-	 * 添加某属性的错误
-	 * @param array $errors
-	 * @return void
-	 */
-	public function addErrors($errors) {
-		foreach($errors as $attribute=>$error) {
-			if(is_array($error)) {
-				foreach($error as $e) {
-					$this->addError($attribute, $e);
-				}					
-			} else {
-				$this->addError($attribute, $error);
-			}
-		}
-	}
-	
-	/**
-	 * 获取某属性的标签
-	 * @param string $attribute
-	 * @return array
-	 */
-	public function getAttributeLabel($attribute) {
-		$labels=$this->attributeLabels();
-		if(isset($labels[$attribute])) {
-			return $labels[$attribute];
-		} else {
-			return $this->generateAttributeLabel($attribute);
-		}
-	}
-	
-	/**
-	 * 创建人性化的标签
-	 * @param string $name
-	 * @return string
-	 */
-	public function generateAttributeLabel($name) {
-		return ucwords(trim(strtolower(str_replace(array('-','_','.'),' ',preg_replace('/(?<![A-Z])[A-Z]/', ' \0', $name)))));
-	}
-	
-	/**
-	 * 创建验证器
-	 * @throws CException
-	 * @return ArrayList
-	 */
-	public function createValidators() {
-		$validators=new ArrayList();
-		foreach($this->rules() as $rule) {
-			if(isset($rule[0],$rule[1])) {
-				$validators->add(Validator::createValidator($rule[1],$this,$rule[0],array_slice($rule,2)));
-			} else {
-				$class = get_class($this);
-				throw new Exception("{$class} has an invalid validation rule. The rule must specify attributes to be validated and the validator name.");
-			}
-		}
-		return $validators;
-	}
-	
-	/**
-	 * 获取验证器
-	 * @param unknown_type $attribute
-	 */
-	public function getValidators($attribute=null) {
-		if($this->_validators===null) {
-			$this->_validators=$this->createValidators();
-		}
-		$validators=array();
-		$scenario=$this->getScenario();
-		foreach($this->_validators as $validator) {
-			if($validator->applyTo($scenario)){
-				if($attribute===null || in_array($attribute,$validator->attributes,true)) {
-					$validators[]=$validator;
-				}
-			}
-		}
-		return $validators;
-	}
-	
-
-	/**
-	 * 属性对应标签
-	 * @return array
-	 */
-	public function attributeLabels() {
-		return array();
-	}
-	
 	
 	/**
 	 * 保存模型
@@ -1020,28 +822,6 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	}
 	
 	/**
-	 * 触发事件beforeValidate
-	 * @return boolean
-	 */
-	protected function beforeValidate() {
-		if($this->hasEventListener(TableEvent::BEFORE_VALIDATE)) {
-			$event = new TableEvent($this);
-			$this->dispatchEvent(TableEvent::BEFORE_VALIDATE, $event);
-			return $event->isValid;
-		} else {
-			return true;
-		}
-	}
-	
-	/**
-	 * 触发事件afterValidate
-	 * @return void
-	 */
-	protected function afterValidate() {
-		$this->dispatchEvent(TableEvent::AFTER_VALIDATE, new Event($this));
-	}
-	
-	/**
 	 * 触发事件beforeDelete
 	 * @return boolean
 	 */
@@ -1077,14 +857,6 @@ abstract class Table extends \ci_ext\events\EventDispatcher {
 	 */
 	protected function afterFind() {
 		$this->dispatchEvent(TableEvent::AFTER_FIND, new Event($this));
-	}
-	
-	/**
-	 * 触发事件afterConstruct
-	 * @return void
-	 */
-	protected function afterConstruct() {
-		$this->dispatchEvent(Event::AFTER_CONSTRUCT, new Event($this));
 	}
 	
 	
