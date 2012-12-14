@@ -1,71 +1,139 @@
 <?php
 namespace ci_ext\web\widgets\gridview;
 
-class GridView {
+/**
+ * GridView
+ * ==============================================
+ * File encoding: UTF-8 
+ * ----------------------------------------------
+ * GridView.php
+ * ==============================================
+ * @author YangDongqi <yangdongqi@gmail.com>
+ * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
+ * @version $id$
+ */
+use ci_ext\utils\VarDumper;
+
+use ci_ext\web\helpers\Html;
+
+class GridView extends \ci_ext\core\Object {
 	
-	public $dataSource;
+	private $_ci;
+	
+	public $id;
+	public $dataProvider;
 	public $columns = array();
+	public $cssFile=null;
+	public $pager=array('class'=>'ci_ext\web\widgets\pagers\LinkPager');
+	public $hasFooter=false;
+	public $hasHeader=true;
+	public $blankDisplay;
+	public $nullDisplay;
+	public $enableSorting=false;
+	public $baseScriptUrl;
 	
 	public function __construct() {
-		$assetBaseUrl = \CI_Controller::get_instance()->publish(dirname(__FILE__).'/assets');
-		\CI_Controller::get_instance()->registerJsFile($assetBaseUrl.'/jquery.gridview.js');
+		$this->_ci =& \get_instance();
+		$assetBaseUrl = $this->_ci->publish(dirname(__FILE__).'/assets', true);
+		$this->_ci->registerJsFile($assetBaseUrl.'/jquery.gridview.js');
+		if($this->cssFile) {
+			$this->_ci->registerCssFile($this->cssFile);
+		}
 	}
 		
 	public function render() {
 		
 		$this->initColumns();
+		$this->dataProvider->getData();
+		$header = '';
+		$footer = '';
 		
-		$header = $this->renderHeader();
+		if($this->hasHeader)		
+			$header = Html::tag('thead', array(), $this->renderHeader(), true);
+		if($this->hasFooter)
+			$footer = Html::tag('tfoot', array(), $this->renderFooter(), true);
 		$body = $this->renderBody();
-		$footer = $this->renderFooter();
+		
+		$pager = $this->createPager();
 		
 		$template = <<<TEMPLATE
-<table id='test'>\n<thead>{$header}</thead>\n<tbody>{$body}</tbody>\n<tfoot>{$footer}</tfoot>\n</table>
+<div class='cie-grid-view' id='{$this->id}'>
+	<table class='items'>\n{$header}\n<tbody>{$body}</tbody>\n{$footer}\n</table>
+	<div class='pager'>{$pager}</div>
+</div>
 TEMPLATE;
 		
+		$this->_ci->registerScript('cie-gridview-'.$this->id, "$('#{$this->id}').cieGridview();");
+		
 		echo $template;
+		
+	}
+	
+	protected function createPager() {
+		$this->pager['pages'] = $this->dataProvider->pagination;
+		$this->dataProvider->pagination->route = uri_string();
+		$page = \CI_Ext::createObject($this->pager);
+		ob_start();
+		$page->init();
+		$page->run();
+		return ob_get_clean();
 	}
 	
 	protected function initColumns() {
 		$newColumns = array();
 		foreach($this->columns as $column) {
+			$config = array();
 			if(is_string($column)) {
-				$newColumns[] = new DataColumn($column, $this);
-			} else {
-				
+				$name = $column;
+				$column = new DataColumn($this);
+				$column->name = $name;
+			} else if(is_array($column)) {
+				$config = $column;
+				if(isset($column['class'])) {
+					$column = \CI_Ext::createObject($config, array($this));
+				} else {
+					$column = new DataColumn($this);
+					foreach($config as $k=>$v) {
+						$column->$k=$v;
+					}
+				}
 			}
+			$column->init();
+			$newColumns[] = $column;
 		}
 		$this->columns = $newColumns;
 	}
 	
 	protected function renderHeader() {
-		$result = "<tr>\n";
+		ob_start();
+		echo "<tr>\n";
 		foreach($this->columns as $column) {
-			$result .= '<th>'.$column->renderHeader()."</th>\n";
+			$column->renderHeaderCell()."\n";
 		}
-		$result .= "</tr>\n";
-		return $result;
+		echo "</tr>\n";
+		return ob_get_clean();
 	}
 	
 	protected function renderBody() {
-		$result = '';
-		foreach($this->dataSource->getData() as $row) {
-			$result .= "<tr>\n";
+		ob_start();
+		foreach($this->dataProvider->getData() as $row=>$data) {
+			echo "<tr>\n";
 			foreach($this->columns as $column) {
-				$result .= '<td>'.$column->renderBody($row)."</td>\n";		
+				$column->renderDataCell($row)."\n";		
 			}
-			$result .= "</tr>\n";
+			echo "</tr>\n";
 		}
-		return $result;
+		return ob_get_clean();
 	}
 	
 	protected function renderFooter() {
-		$result = "<tr>\n";
+		ob_start();
+		echo "<tr>\n";
 		foreach($this->columns as $column) {
-			$result .= '<td>'.$column->renderFooter()."</td>\n";
+			$column->renderFooterCell()."\n";
 		}
-		$result .= "</tr>\n";
-		return $result;
+		echo "</tr>\n";
+		return ob_get_clean();
 	}
 	
 	

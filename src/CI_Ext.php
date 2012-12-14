@@ -13,6 +13,8 @@
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
+
+
 class CI_Ext {
 	
 	private static $_tData;
@@ -30,7 +32,7 @@ class CI_Ext {
 	 * @return void
 	 */
 	public static function setup() {
-		define('ID_DEV_MODE', in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', '::1')) ? 'local' : 'remote');
+		defined('IS_DEV_MODE') or define('IS_DEV_MODE', in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', '::1')) ? 'local' : 'remote');
 		spl_autoload_register(array('CI_Ext', 'autoload'));
 	}
 	
@@ -44,6 +46,30 @@ class CI_Ext {
 			$filename = dirname(__FILE__)."/".str_replace('\\', '/', substr($className, 6)).'.php';
 			include $filename;
 		}
+	}
+	
+	/**
+	 * 创建对象
+	 * @param array $config
+	 * @param array $constructorArgs
+	 */
+	public static function createObject($config, $constructorArgs = array()) {
+		$className = $config['class'];
+		if(isset(self::$_coreClasses[$className])) {
+			$className = self::$_coreClasses[$className];
+		}
+		$rc = new ReflectionClass($className);
+		$object = null;
+		if($rc->hasMethod('__construct')) {
+			$object = $rc->newInstanceArgs($constructorArgs);
+		} else {
+			$object = $rc->newInstance();
+		}
+		unset($config['class']);
+		foreach($config as $k=>$v) {
+			$object->$k = $v;
+		}
+		return $object;
 	}
 	
 	/**
@@ -61,6 +87,11 @@ class CI_Ext {
 		}
 		return $message;
 	}
+	
+	
+	private static $_coreClasses = array(
+		'ButtonColumn' => 'ci_ext\web\widgets\gridview\ButtonColumn',
+	);
 	
 }
 CI_Ext::setup();

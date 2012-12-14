@@ -3,7 +3,7 @@ namespace ci_ext\web;
 
 use ci_ext\db\DbCriteria;
 
-class TableDataSource extends DataSource {
+class TableDataProvider extends DataProvider {
 	
 	private $_tableClass;
 	private $_table;
@@ -18,16 +18,22 @@ class TableDataSource extends DataSource {
 		}
 		parent::__construct($config);
 	}
+	
 	protected function fetchKeys() {
 		$keys = array_keys($this->_table->attributes);
 	}
+	
 	protected function fetchData() {
 		$criteria = new DbCriteria();
 		$page = $this->pagination;
-		$criteria->limit = $page->pageSize;
-		$criteria->offset = ($page->getCurrentPage()-1)*$page->pageSize;
+		$page->itemCount = $this->_table->count();
+		$page->applyLimit($criteria);
 		$data = $this->_table->findAll($criteria);
 		return $data;
+	}
+	
+	public function getModel() {
+		return $this->_table;
 	}
 	
 	

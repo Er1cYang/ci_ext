@@ -1,7 +1,7 @@
 <?php
 namespace ci_ext\web;
 
-class DataSource extends \ci_ext\core\Object {
+class DataProvider extends \ci_ext\core\Object {
 	
 	private $_data;
 	private $_pagination;
@@ -28,7 +28,7 @@ class DataSource extends \ci_ext\core\Object {
 	}
 	
 	public function getPagination() {
-		if(!$this->_) {
+		if(!$this->_pagination) {
 			$this->_pagination = new Pagination();
 		}
 		return $this->_pagination;

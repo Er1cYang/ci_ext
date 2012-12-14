@@ -1,6 +1,8 @@
 <?php
 namespace ci_ext\web;
 
+use ci_ext\utils\HashMap;
+
 use ci_ext\utils\ArrayList;
 use ci_ext\utils\FileHelper;
 /**
@@ -16,9 +18,11 @@ use ci_ext\utils\FileHelper;
  */
 class WebController extends \CI_Controller {
 	
+	private $_jsFiles;
+	private $_cssFiles;
 	private $_js;
-	private $_css;
-	private $_assetRendered = false;		// 是否已经注册了asset文件
+	private $_assetHeaderRendered = false;		// 是否已经注册了头部asset文件
+	private $_assetFooterRendered = false;
 	
 	/**
 	 * 初始化js和css容器
@@ -26,8 +30,9 @@ class WebController extends \CI_Controller {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->_js = new ArrayList();
-		$this->_css = new ArrayList();
+		$this->_jsFiles = new ArrayList();
+		$this->_cssFiles = new ArrayList();
+		$this->_js = new HashMap();
 		$this->load->helper('url');
 		$this->init();
 	}
@@ -42,8 +47,89 @@ class WebController extends \CI_Controller {
 	 * 获取网站根节点
 	 * @return string
 	 */
-	public function getBaseUrl() {
-		return base_url();
+	public function getBaseUrl($url='') {
+		return base_url($url);
+	}
+	
+	/**
+	 * @see site_url()
+	 * @return string
+	 */
+	public function getSiteUrl($uri='') {
+		return site_url($uri);
+	}
+	
+	/**
+	 * 跳转
+	 * @param string $url
+	 * @param boolean $terminate
+	 * @param integer $statusCode
+	 * @return void
+	 */
+	public function redirect($url,$terminate=true,$statusCode=302) {
+	    header('Location: '.$url, true, $statusCode);
+	    if($terminate) {
+	    	die();
+	    }
+	}
+	
+	/**
+	 * 创建链接
+	 * @param string $route
+	 * @param params $params
+	 */
+	public function createUrl($route, $params=array()) {
+		$url = $this->getSiteUrl();
+		if(substr($route, 0, 1)=='/') {
+			$url.=$route;
+		} else {
+			$currentRouteInfo = $this->getRouteInfo();
+			switch(substr_count($route, '/')) {
+				case 2: // d/c/a
+					$url.='/'.$route;
+					break;
+				case 0: // a
+					$url.=isset($currentRouteInfo['d'])?'/'.$currentRouteInfo['d']:'';
+					$url.='/'.$currentRouteInfo['c'].'/'.$route;
+					break;
+				case 1: // c/a
+					$url.=isset($currentRouteInfo['d'])?'/'.$currentRouteInfo['d']:'';
+					$url.='/'.$route;
+					break;
+			}
+		}
+		
+		if($params) {
+			$url .= '?'.http_build_query($params);
+		}
+		
+		return $url;
+		
+	}
+	
+	/**
+	 * 获取当前uri的route信息
+	 * @return array
+	 */
+	public function getRouteInfo($uri='') {
+		if(!$uri) $uri = uri_string();
+		$routeInfo = array();
+		$path = WEB_ROOT.'/'.APPPATH.'controllers';
+		$routeArray = explode('/', $uri);
+		$count = count($routeArray);
+		for($i=0; $i<3&&$i<$count; ++$i) {
+			$name = $routeArray[$i];
+			$path .= '/'.$name;
+			$file = $path.'.php';
+			if(file_exists($path)) {
+				$routeInfo['d'] = $name;
+			} else if(file_exists($file)) {
+				$routeInfo['c'] = $name;
+			} else {
+				$routeInfo['a'] = $name;
+			}
+		}
+		return $routeInfo;
 	}
 	
 	/**
@@ -52,8 +138,8 @@ class WebController extends \CI_Controller {
 	 * @return void
 	 */
 	public function registerCssFile($file) {
-		if(!$this->_css->contain($file)) {
-			$this->_css->push($file);
+		if(!$this->_cssFiles->contain($file)) {
+			$this->_cssFiles->push($file);
 		}
 	}
 	
@@ -63,10 +149,35 @@ class WebController extends \CI_Controller {
 	 * @return void
 	 */
 	public function registerJsFile($file) {
-		if(!$this->_js->contain($file)) {
-			$this->_js->push($file);
+		if(!$this->_jsFiles->contain($file)) {
+			$this->_jsFiles->push($file);
 		}
 	}
+	
+	/**
+	 * 在指定位置注册一段JS代码
+	 * @param string $id
+	 * @param string $script
+	 * @param string $position
+	 * @return void
+	 */
+	public function registerScript($id, $script, $position=null) {
+		if(!$this->_js->contains($id)) {
+			$this->_js->add($id, $script);
+		}
+	}
+	
+	/**
+	 * 获取当前链接地址
+	 * @return string
+	 */
+	public function getCurrentUrl() {
+		$url = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off' ? 'https' : 'http';
+		$url .= '://'. $_SERVER['HTTP_HOST'];
+		$url .= $_SERVER['REQUEST_URI'];
+		return $url;
+	}
+	
 	
 	/**
 	 * 发布到web可以访问的目录
@@ -104,22 +215,53 @@ class WebController extends \CI_Controller {
 		ob_start();
 		$this->load->view($view, $data);
 		$output = ob_get_clean();
-		if(!$this->_assetRendered) {
-			$count=0;
-			$output=preg_replace('/(<title\b[^>]*>|<\\/head\s*>)/is','<###head###>$1',$output,1,$count);
-			if($count) {
-				$assetHtml = '';
-				foreach($this->_css as $one) {
-					$assetHtml .= "<link href='{$one}' type='text/css' rel='stylesheet' />\n";
-				}
-				foreach($this->_js as $one) {
-					$assetHtml .= "<script type='text/javascript' src='{$one}'></script>\n";
-				}
-				$output=str_replace('<###head###>', $assetHtml, $output);
-				$this->_assetRendered = true;
-			}
+		if(!$this->_assetHeaderRendered) {
+			$this->renderHeaderAssets($output);
+		}
+		if(!$this->_assetFooterRendered) {
+			$this->renderFooterAssets($output);
 		}
 		echo $output;
+	}
+	
+	/**
+	 * 渲染头部js、css文件
+	 * @param string $output
+	 * @return void
+	 */
+	protected function renderHeaderAssets(&$output) {
+		$count=0;
+		$output=preg_replace('/(<title\b[^>]*>|<\\/head\s*>)/is','<###head###>$1',$output,1,$count);
+		if($count) {
+			$assetHtml = '';
+			foreach($this->_cssFiles as $one) {
+				$assetHtml .= "<link href='{$one}' type='text/css' rel='stylesheet' />\n";
+			}
+			foreach($this->_jsFiles as $one) {
+				$assetHtml .= "<script type='text/javascript' src='{$one}'></script>\n";
+			}
+			$output=str_replace('<###head###>', $assetHtml, $output);
+			$this->_assetHeaderRendered = true;
+		}
+	}
+	
+	/**
+	 * 渲染底部js代码
+	 * @param string $output
+	 * @return void
+	 */
+	protected function renderFooterAssets(&$output) {
+		$output=preg_replace('/(<\\/body\s*>)/is','<###end###>$1',$output,1,$fullPage);
+		if($fullPage) {
+			$assetHtml = '<script type="text/javascript">'."\n";
+			foreach($this->_js as $block) {
+				$assetHtml .= $block."\n";
+			}
+			$assetHtml .= '</script>'."\n";
+			$output=str_replace('<###end###>', $assetHtml, $output);
+			$this->_assetFooterRendered = true;
+		}
+		
 	}
 
 }

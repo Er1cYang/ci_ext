@@ -106,6 +106,22 @@ class Object {
 	public function canSetProperty($name) {
 		return method_exists($this,'set'.$name);
 	}
+	
+	/**
+	 * eval
+	 * @param string $_expression_
+	 * @param array $_data_
+	 * @return mixed
+	 */
+	public function evaluateExpression($_expression_, $_data_ = array()) {
+		if (is_string ( $_expression_ )) {
+			extract ( $_data_ );
+			return eval ( 'return ' . $_expression_ . ';' );
+		} else {
+			$_data_ [] = $this;
+			return call_user_func_array ( $_expression_, $_data_ );
+		}
+	}
 }
 
 ?>

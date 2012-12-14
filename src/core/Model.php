@@ -16,7 +16,7 @@ use ci_ext\validators\Validator;
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-class Model extends \ci_ext\events\EventDispatcher implements \IteratorAggregate, \ArrayAccess {
+abstract class Model extends \ci_ext\events\EventDispatcher implements \IteratorAggregate, \ArrayAccess {
 	
 	private $_errors = array ();
 	private $_validators;

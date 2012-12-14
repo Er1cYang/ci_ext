@@ -21,20 +21,31 @@
 	
 	cieGridview.fn = cieGridview.prototype = {
 		constructor: function($element, config) {
-			this.tableId = '#'+$element.attr('id');
-			this.table = $element;
+			this.id = '#'+$element.attr('id');
+			this.element = $element;
 			this.config = config;
+			this.init();
+		},
+		
+		init: function() {
+			var that = this;
+			this.element.find('.pager a').live('click', function() {
+				that.update({url: this.href})
+				return false;
+			});
 		},
 		
 		update: function(options) {
-			options = $.extend({
-				url: this.config.url
-			}, options);
+			if(options) {
+				this.config = $.extend(this.config, options);
+			} else {
+				options = this.config;
+			}
 			var that = this;
-			$.get(options.url, {ajaxId: this.config.id}, function(result) {
+			$.get(options.url, function(result) {
 				var $data = $('<div>' + result + '</div>');
-				that.table.replaceWith($(that.tableId, $data));
-			})
+				that.element.html($(that.id, $data).html());
+			});
 		}
 	}
 	
