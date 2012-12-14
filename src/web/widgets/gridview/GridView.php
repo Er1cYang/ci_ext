@@ -32,6 +32,8 @@ class GridView extends \ci_ext\core\Object {
 	public $enableSorting=true;
 	public $baseScriptUrl;
 	public $sort;
+	public $selectableRows=1;
+	public $rowCssClass=array('odd', 'even');
 	
 	public function __construct() {
 		$this->_ci =& \get_instance();
@@ -72,8 +74,9 @@ TEMPLATE;
 	
 	protected function createPager() {
 		$this->pager['pages'] = $this->dataProvider->pagination;
-		$this->dataProvider->pagination->route = uri_string();
-		$this->dataProvider->sort->route = uri_string();
+		$route = get_instance()->getRoute();;
+		$this->dataProvider->pagination->route = $route;
+		$this->dataProvider->sort->route = $route;
 		$page = \CI_Ext::createObject($this->pager);
 		ob_start();
 		$page->init();
@@ -118,8 +121,11 @@ TEMPLATE;
 	
 	protected function renderBody() {
 		ob_start();
+		$rowClasses = $this->rowCssClass;
+		$rowClassCount = count($rowClasses);
 		foreach($this->dataProvider->getData() as $row=>$data) {
-			echo "<tr>\n";
+			$rowClass = $rowClasses[$row%$rowClassCount];
+			echo "<tr class='{$rowClass}'>\n";
 			foreach($this->columns as $column) {
 				$column->renderDataCell($row)."\n";		
 			}

@@ -108,6 +108,15 @@ class WebController extends \CI_Controller {
 	}
 	
 	/**
+	 * 获取当前路由
+	 * @return string
+	 */
+	public function getRoute() {
+		$info = $this->getRouteInfo();
+		return '/'.join('/', $info);
+	}
+	
+	/**
 	 * 获取当前uri的route信息
 	 * @return array
 	 */

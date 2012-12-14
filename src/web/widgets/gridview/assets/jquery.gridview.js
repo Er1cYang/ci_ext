@@ -36,6 +36,28 @@
 			});
 		},
 		
+		getSelectedValue: function() {
+			var values = this.getSelectedValues();
+			return values.length>0?values[0]:null;
+		},
+		
+		getSelectedValues: function() {
+			var values = new Array();
+			var $checkeds = this.element.find('table tbody :checked').each(function(i, e) {
+				values.push(e.value);
+			});
+			return values;
+		},
+		
+		getRow: function(index) {
+			var $rows = this.getRows();
+			return $rows.eq(index);
+		},
+		
+		getRows: function() {
+			return this.element.find('tbody tr');
+		},
+		
 		update: function(options) {
 			var that = this;
 			options = options || {};
