@@ -29,23 +29,47 @@
 		
 		init: function() {
 			var that = this;
-			this.element.find('.pager a').live('click', function() {
+			ajaxUpdater = '.pager a, thead a';
+			this.element.find(ajaxUpdater).live('click', function() {
 				that.update({url: this.href})
 				return false;
 			});
 		},
 		
 		update: function(options) {
-			if(options) {
-				this.config = $.extend(this.config, options);
-			} else {
-				options = this.config;
-			}
 			var that = this;
-			$.get(options.url, function(result) {
-				var $data = $('<div>' + result + '</div>');
-				that.element.html($(that.id, $data).html());
-			});
+			options = options || {};
+			options = $.extend({
+				url: this.config.url,
+				type: 'GET',
+				success: function(data) {
+					var $data = $('<div>' + data + '</div>');
+					that.element.html($(that.id, $data).html());
+				},
+				error: function (XHR, textStatus, errorThrown) {
+					var err;
+					switch (textStatus) {
+						case 'timeout':
+							err = 'The request timed out!';
+							break;
+						case 'parsererror':
+							err = 'Parser error!';
+							break;
+						case 'error':
+							if (XHR.status && !/^\s*$/.test(XHR.status)) {
+								err = 'Error ' + XHR.status;
+							} else {
+								err = 'Error';
+							}
+							if (XHR.responseText && !/^\s*$/.test(XHR.responseText)) {
+								err = err + ': ' + XHR.responseText;
+							}
+							break;
+					}
+					alert(err);
+				}
+			}, options);
+			$.ajax(options);
 		}
 	}
 	

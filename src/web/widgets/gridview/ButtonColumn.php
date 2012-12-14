@@ -77,7 +77,13 @@ function() {
 	$confirmation
 	var th=this;
 	var afterDelete=$this->afterDelete;
-	$.cieGridview.get('{$this->grid->id}');
+	$.cieGridview.get('{$this->grid->id}').update({
+		type:'POST',
+		url:$(this).attr('href'),
+		success:function(data) {
+			$.cieGridview.get('{$this->grid->id}').update();
+		}
+	});
 	return false;
 }
 EOD;
@@ -85,13 +91,12 @@ EOD;
 	}
 	
 	protected function registerClientScript() {
-		return;
 		$js = array ();
 		foreach ( $this->buttons as $id => $button ) {
 			if (isset ( $button ['click'] )) {
 				$function = JavaScript::encode ( $button ['click'] );
 				$class = preg_replace ( '/\s+/', '.', $button ['options'] ['class'] );
-				$js [] = "$(document).on('click','#{$this->grid->id} a.{$class}',$function);";
+				$js [] = "$('#{$this->grid->id} a.{$class}').live('click',$function);";
 			}
 		}
 		

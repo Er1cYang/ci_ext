@@ -3,7 +3,7 @@ namespace ci_ext\web;
 
 class Pagination extends \ci_ext\core\Object {
 	
-	const DEFAULT_PAGE_SIZE = 1;
+	const DEFAULT_PAGE_SIZE = 10;
 	public $pageVar = 'page';
 	public $route = '';
 	public $params;

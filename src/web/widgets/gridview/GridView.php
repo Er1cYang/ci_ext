@@ -29,8 +29,9 @@ class GridView extends \ci_ext\core\Object {
 	public $hasHeader=true;
 	public $blankDisplay;
 	public $nullDisplay;
-	public $enableSorting=false;
+	public $enableSorting=true;
 	public $baseScriptUrl;
+	public $sort;
 	
 	public function __construct() {
 		$this->_ci =& \get_instance();
@@ -72,6 +73,7 @@ TEMPLATE;
 	protected function createPager() {
 		$this->pager['pages'] = $this->dataProvider->pagination;
 		$this->dataProvider->pagination->route = uri_string();
+		$this->dataProvider->sort->route = uri_string();
 		$page = \CI_Ext::createObject($this->pager);
 		ob_start();
 		$page->init();
