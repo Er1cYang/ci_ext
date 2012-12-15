@@ -2,6 +2,8 @@
 
 namespace ci_ext\db;
 
+use ci_ext\utils\VarDumper;
+
 use ci_ext\core\Exception;
 use ci_ext\events\Event;
 use ci_ext\validators\Validator;
@@ -111,6 +113,7 @@ abstract class Table extends \ci_ext\core\Model {
 		if(!$this->_dbConnection) {
 			$ci =& get_instance();
 			$ci->load->database();
+			$ci->db->simple_query("SET NAMES {$ci->db->char_set}"); // MySQL only
 			$this->setDbConnection($ci->db);
 		}
 		return $this->_dbConnection;
