@@ -113,7 +113,7 @@ abstract class Table extends \ci_ext\core\Model {
 		if(!$this->_dbConnection) {
 			$ci =& get_instance();
 			$ci->load->database();
-			$ci->db->simple_query("SET NAMES {$ci->db->char_set}"); // MySQL only
+			$ci->db->simple_query("SET NAMES {$ci->db->char_set}"); // PDO::MySQL only
 			$this->setDbConnection($ci->db);
 		}
 		return $this->_dbConnection;
