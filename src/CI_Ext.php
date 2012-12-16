@@ -92,6 +92,7 @@ class CI_Ext {
 	private static $_coreClasses = array(
 		'ButtonColumn' => 'ci_ext\web\widgets\gridview\ButtonColumn',
 		'CheckBoxColumn' => 'ci_ext\web\widgets\gridview\CheckBoxColumn',
+		'TableForm' => 'ci_ext\web\widgets\TableForm',
 	);
 	
 }
