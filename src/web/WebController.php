@@ -1,6 +1,8 @@
 <?php
 namespace ci_ext\web;
 
+use ci_ext\core\Exception;
+
 use ci_ext\utils\HashMap;
 
 use ci_ext\utils\ArrayList;
@@ -23,6 +25,7 @@ class WebController extends \CI_Controller {
 	private $_js;
 	private $_assetHeaderRendered = false;		// 是否已经注册了头部asset文件
 	private $_assetFooterRendered = false;
+	private $_widgetStack = array();
 	
 	/**
 	 * 初始化js和css容器
@@ -220,7 +223,7 @@ class WebController extends \CI_Controller {
 	 * @param array $data
 	 */
 	public function render($view, $data=array()) {
-		$data['this'] = $this;
+		$data['controller'] = get_instance();
 		ob_start();
 		$this->load->view($view, $data);
 		$output = ob_get_clean();
@@ -270,7 +273,70 @@ class WebController extends \CI_Controller {
 			$output=str_replace('<###end###>', $assetHtml, $output);
 			$this->_assetFooterRendered = true;
 		}
-		
+	
+	}
+	
+	/**
+	 * 创建widget
+	 * @param string $className
+	 * @param array $properties
+	 * @return Widget
+	 */
+	protected function createWidget($className, $properties = array()) {
+		$properties['class'] = $className;
+		$widget = \CI_Ext::createObject($properties);
+		$widget->init();
+		return $widget;
+	}
+	
+	/**
+	 * 直接渲染一个widget
+	 * @param string $className
+	 * @param array $properties
+	 * @param boolean $captureOutput
+	 * @return Widget
+	 */
+	public function widget($className, $properties = array(), $captureOutput=false) {
+		if ($captureOutput) {
+			ob_start ();
+			ob_implicit_flush ( false );
+			$widget = $this->createWidget ( $className, $properties );
+			$widget->run ();
+			return ob_get_clean ();
+		} else {
+			$widget = $this->createWidget ( $className, $properties);
+			$widget->run();
+			return $widget;
+		}
+	}
+	
+	/**
+	 * 打开一个widget
+	 * @param string $className
+	 * @param array $properties
+	 * @return Widget
+	 */
+	public function beginWidget($className,$properties=array()) {
+		$widget=$this->createWidget($className,$properties);
+		$this->_widgetStack[]=$widget;
+		return $widget;
+	}
+	
+	/**
+	 * 闭合一个widget
+	 * @param string $id
+	 * @throws Exception
+	 * @return void
+	 */
+	public function endWidget($id='') {
+		if(($widget=array_pop($this->_widgetStack))!==null)
+		{
+			$widget->run();
+			return $widget;
+		}
+		else
+			throw new Exception(\CI_Ext::t('core','{controller} has an extra endWidget({id}) call in its view.',
+				array('{controller}'=>get_class($this),'{id}'=>$id)));
 	}
 
 }

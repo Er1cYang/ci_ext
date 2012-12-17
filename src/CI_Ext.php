@@ -90,9 +90,15 @@ class CI_Ext {
 	
 	
 	private static $_coreClasses = array(
+		'DataColumn' => 'ci_ext\web\widgets\gridview\DataColumn',
 		'ButtonColumn' => 'ci_ext\web\widgets\gridview\ButtonColumn',
 		'CheckBoxColumn' => 'ci_ext\web\widgets\gridview\CheckBoxColumn',
 		'TableForm' => 'ci_ext\web\widgets\TableForm',
+		'GridView' => 'ci_ext\web\widgets\gridview\GridView',
+		'LinkPager' => 'ci_ext\web\widgets\pagers\LinkPager',
+		'TableDataProvider' => 'ci_ext\web\TableDataProvider',
+		'Sort' => 'ci_ext\web\Sort',
+		'Pagination' => 'ci_ext\web\Pagination',
 	);
 	
 }

@@ -16,7 +16,7 @@ use ci_ext\utils\VarDumper;
 
 use ci_ext\web\helpers\Html;
 
-class GridView extends \ci_ext\core\Object {
+class GridView extends \ci_ext\web\Widget {
 	
 	private $_ci;
 	
@@ -43,8 +43,11 @@ class GridView extends \ci_ext\core\Object {
 			$this->_ci->registerCssFile($this->cssFile);
 		}
 	}
+	
+	public function init() {
+	}
 		
-	public function render() {
+	public function run() {
 		
 		$this->initColumns();
 		$this->dataProvider->getData();
@@ -61,7 +64,7 @@ class GridView extends \ci_ext\core\Object {
 		
 		$template = <<<TEMPLATE
 <div class='cie-grid-view' id='{$this->id}'>
-	<table class='items'>\n{$header}\n<tbody>{$body}</tbody>\n{$footer}\n</table>
+	<table class='items class'>\n{$header}\n<tbody>{$body}</tbody>\n{$footer}\n</table>
 	<div class='pager'>{$pager}</div>
 </div>
 TEMPLATE;
