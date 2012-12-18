@@ -60,7 +60,6 @@
 		
 		update: function(options) {
 			var that = this;
-			options = options || {};
 			options = $.extend({
 				url: this.config.url,
 				type: 'GET',
@@ -91,7 +90,7 @@
 					alert(err);
 				}
 			}, options);
-			$.ajax(options);
+			$.ajax(options, options || {});
 		}
 	}
 	

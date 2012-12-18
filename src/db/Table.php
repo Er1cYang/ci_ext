@@ -301,7 +301,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createPkCriteria($table,$pk,$condition,$params);
 		$sql=$builder->createUpdateCommand($table,$attributes,$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
@@ -317,7 +317,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createCriteria($condition,$params);
 		$sql=$builder->createUpdateCommand($this->tableName(),$attributes,$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
@@ -340,7 +340,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createCriteria($condition,$params);
 		$sql=$builder->createUpdateCounterCommand($this->tableName(),$counters,$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
@@ -382,7 +382,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createPkCriteria($this->tableName(),$pk,$condition,$params);
 		$sql=$builder->createDeleteCommand($this->tableName(),$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
@@ -399,7 +399,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createCriteria($condition,$params);
 		$sql=$builder->createDeleteCommand($this->tableName(),$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
@@ -416,7 +416,7 @@ abstract class Table extends \ci_ext\core\Model {
 		$criteria=$builder->createColumnCriteria($this->tableName(),$attributes,$condition,$params);
 		$sql=$builder->createDeleteCommand($this->tableName(),$criteria);
 		$this->getDbConnection()->simple_query($sql);
-		return $this->getDbConnection->affected_rows();
+		return $this->getDbConnection()->affected_rows();
 	}
 	
 	/**
