@@ -1,7 +1,7 @@
 <?php
 namespace ci_ext\db;
 use ci_ext\events\Event;
-class TableBehavior extends \ci_ext\core\Behavior {
+class TableBehavior extends \ci_ext\core\ModelBehavior {
 	
 	/**
 	 * 侦听了所有相关于Table的事件
