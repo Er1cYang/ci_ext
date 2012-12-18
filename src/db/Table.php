@@ -62,6 +62,9 @@ abstract class Table extends \ci_ext\core\Model {
 		$this->setIsNewRecord(true);
 		$this->init();
 		$this->attachBehaviors($this->behaviors());
+		foreach($this->defaultValues() as $k=>$v) {
+			$this->$k = $v;
+		}
 		$this->afterConstruct();
 	}
 	
@@ -85,6 +88,14 @@ abstract class Table extends \ci_ext\core\Model {
 	 * @return void
 	 */
 	public function init() {
+	}
+	
+	/**
+	 * 返回默认的属性值
+	 * @return array
+	 */
+	public function defaultValues() {
+		return array();
 	}
 	
 	/**
