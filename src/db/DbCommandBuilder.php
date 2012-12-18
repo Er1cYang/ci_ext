@@ -1,17 +1,6 @@
 <?php
 namespace ci_ext\db;
 use ci_ext\db\DbException;
-/**
- * CommandBuilder
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * DbCommandBuilder.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 class DbCommandBuilder extends \ci_ext\core\Object {
 	
 	const PARAM_PREFIX=':cip';

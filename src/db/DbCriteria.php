@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\db;
-/**
- * DbCriteria
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * DbCommand.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 class DbCriteria extends \ci_ext\core\Object {
 	
 	const PARAM_PREFIX = ':cip';

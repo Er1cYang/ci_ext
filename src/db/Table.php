@@ -7,20 +7,6 @@ use ci_ext\utils\VarDumper;
 use ci_ext\core\Exception;
 use ci_ext\events\Event;
 use ci_ext\validators\Validator;
-/**
- * TableRecord
- * <pre>
- * Table Getway + Row Getway
- * </pre>
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * ActiveRow.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 abstract class Table extends \ci_ext\core\Model {
 	
 	/* 未实现 */
