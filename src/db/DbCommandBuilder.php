@@ -45,11 +45,11 @@ class DbCommandBuilder extends \ci_ext\core\Object {
 	}
 	
 	public function getPrimaryKey($table) {
-		return $this->getDbConnection()->primary($table);
+		return $table->primaryKey();
 	}
 	
 	public function getTableRawName($table) {
-		return "`$table`";
+		return $this->quoteTableName($table->tableName());
 	}
 	
 	public function quoteValue($value) {
@@ -434,7 +434,7 @@ class DbCommandBuilder extends \ci_ext\core\Object {
 	}
 	
 	protected function ensureTable($table) {
-		$tables = $this->getDbConnection()->list_tables();
+		//$tables = $this->getDbConnection()->list_tables();
 		/*if(!in_array($table, $tables)) {
 			throw new DbException('yii','Table "'.$table.'" does not exist.');
 		}*/
