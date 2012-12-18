@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\web\helpers;
-/**
- * CJavaScript
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * CJavaScript.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 class JavaScript {
 	public static function quote($js, $forUrl = false) {
 		if ($forUrl)

@@ -4,18 +4,6 @@ use ci_ext\db\DbCriteria;
 use ci_ext\db\Table;
 use ci_ext\web\helpers\JSON;
 use ci_ext\core\Exception;
-
-/**
- * Validator
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * Validator.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 abstract class Validator extends \ci_ext\core\Object {
 	
 	public static $builtInValidators = array (

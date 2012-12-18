@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\web\widgets\gridview;
-/**
- * DataColumn
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * DataColumn.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 use ci_ext\web\TableDataProvider;
 use ci_ext\web\helpers\Html;
 use ci_ext\core\Exception;

@@ -1,17 +1,6 @@
 <?php
 namespace ci_ext\web\widgets\gridview;
 
-/**
- * GridView
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * GridView.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 use ci_ext\utils\VarDumper;
 
 use ci_ext\web\helpers\Html;

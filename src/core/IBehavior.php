@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\core;
-/**
- * IBehavior
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * IBehavior.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 interface IBehavior {
 	/**
 	 * 装载behavior

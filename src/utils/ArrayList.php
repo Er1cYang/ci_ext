@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\utils;
-/**
- * ArrayList
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * ArrayList.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 class ArrayList extends \ci_ext\core\Object implements \ArrayAccess, \Countable, \IteratorAggregate {
 	
 	private $_d = array();

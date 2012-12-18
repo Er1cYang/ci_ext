@@ -1,7 +1,6 @@
 <?php
 namespace ci_ext\db;
 use ci_ext\events\Event;
-
 class TableBehavior extends \ci_ext\core\Behavior {
 	
 	/**
@@ -9,16 +8,14 @@ class TableBehavior extends \ci_ext\core\Behavior {
 	 * @see ci_ext\core.Behavior::events()
 	 */
 	public function events() {
-		return array(
+		return array_merge(parent::events(), array(
 			TableEvent::BEFORE_FIND 	=> 'beforeFind',
 			TableEvent::AFTER_FIND 		=> 'afterFind',
 			TableEvent::BEFORE_SAVE 	=> 'beforeSave',
 			TableEvent::AFTER_SAVE 		=> 'afterSave',
-			TableEvent::BEFORE_VALIDATE => 'beforeValidate',
-			TableEVent::AFTER_VALIDATE 	=> 'afterValidate',
 			TableEvent::BEFORE_DELETE 	=> 'beforeDelete',
 			TableEvent::AFTER_DELETE 	=> 'afterDelete',
-		);
+		));
 	}
 	
 	/**
@@ -51,22 +48,6 @@ class TableBehavior extends \ci_ext\core\Behavior {
 	 * @return void
 	 */
 	public function afterSave(Event $e) {
-	}
-	
-	/**
-	 * @see Table::beforeValidate
-	 * @param TableEvent $e
-	 * @return void
-	 */
-	public function beforeValidate(TableEvent $e) {
-	}
-	
-	/**
-	 * @see Table::afterValidate
-	 * @param Event $e
-	 * @return void
-	 */
-	public function afterValidate(Event $e) {
 	}
 	
 	/**

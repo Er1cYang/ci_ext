@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\web\widgets\gridview;
-/**
- * GridColumn
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * GridColumn.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 use ci_ext\web\helpers\Html;
 
 class GridColumn extends \ci_ext\core\Object {

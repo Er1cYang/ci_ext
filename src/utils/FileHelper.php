@@ -1,16 +1,5 @@
 <?php
 namespace ci_ext\utils;
-/**
- * FileHelper
- * ==============================================
- * File encoding: UTF-8 
- * ----------------------------------------------
- * FileHelper.php
- * ==============================================
- * @author YangDongqi <yangdongqi@gmail.com>
- * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
- * @version $id$
- */
 class FileHelper {
 	public static function getExtension($path) {
 		return pathinfo ( $path, PATHINFO_EXTENSION );

@@ -13,8 +13,6 @@
  * @copyright Copyright &copy; 2006-2012 Hayzone IT LTD.
  * @version $id$
  */
-
-
 class CI_Ext {
 	
 	private static $_tData;
@@ -25,6 +23,14 @@ class CI_Ext {
 	 */
 	public static function charset() {
 		return 'utf-8';
+	}
+	
+	/**
+	 * 返回CI的控制器实例
+	 * @return CI_Controller
+	 */
+	public static function ci() {
+		return get_instance();
 	}
 	
 	/**
@@ -74,18 +80,19 @@ class CI_Ext {
 	
 	/**
 	 * 转换字符串占位符
+	 * @category string
 	 * @param string $message
 	 * @param array $params
 	 * @return string
 	 */
-	public static function t($category, $message) {
+	public static function t($category, $message, $params=array()) {
 		if(!self::$_tData) {
 			self::$_tData = include dirname(__FILE__).'/message/'.$category.'.php';
 		}
 		if(isset(self::$_tData[$message])) {
 			$message = self::$_tData[$message];
 		}
-		return $message;
+		return str_replace(array_keys($params), array_values($params), $message);
 	}
 	
 	
