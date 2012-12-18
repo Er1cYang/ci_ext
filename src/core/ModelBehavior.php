@@ -1,5 +1,6 @@
 <?php
 namespace ci_ext\core;
+use ci_ext\events\event;
 class ModelBehavior extends Behavior {
 	
 	public function events() {

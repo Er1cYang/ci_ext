@@ -1,6 +1,8 @@
 <?php
 
 namespace ci_ext\events;
+use ci_ext\utils\VarDumper;
+
 use ci_ext\utils\ArrayList;
 use ci_ext\core\IBehavior;
 use ci_ext\core\Exception;
@@ -158,8 +160,30 @@ class EventDispatcher extends \ci_ext\core\Object {
 		if(!isset($this->_e[$type])) {
 			$this->_e[$type] = new ArrayList();
 		}
-		$this->_e[$type]->unshift(array($priority, $listener));
-		$this->sortEventListeners($this->_e[$type]);
+		
+		if(!$this->isEventListenerExists($type, $listener)) {
+			$this->_e[$type]->unshift(array($priority, $listener));
+			$this->sortEventListeners($this->_e[$type]);
+		}
+		
+	}
+	
+	/**
+	 * 检测某个侦听器是否存在与某个事件下
+	 * @param string $type
+	 * @param mixed $listener
+	 * @return boolean
+	 */
+	public function isEventListenerExists($type, $listener) {
+		if(!isset($this->_e[$type])) {
+			return false;
+		}
+		foreach($this->_e[$type] as $listenerStruct) {
+			list($priority, $exists) = $listenerStruct;
+			if($listener == $exists)
+				return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -237,6 +261,10 @@ class EventDispatcher extends \ci_ext\core\Object {
 	 * @return boolean
 	 */
 	public function dispatchEvent($type, Event $event) {
+		if($type == 'afterSave') {
+			//echo '走';
+			//VarDumper::dump($this->_e[$type], 5, true);
+		}
 		if(!isset($this->_e[$type])) {
 			return;
 		}
