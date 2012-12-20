@@ -1,5 +1,6 @@
 <?php
 namespace ci_ext\validators;
+use ci_ext\web\UploadedFile;
 use ci_ext\db\DbCriteria;
 use ci_ext\db\Table;
 use ci_ext\web\helpers\JSON;
@@ -7,26 +8,27 @@ use ci_ext\core\Exception;
 abstract class Validator extends \ci_ext\core\Object {
 	
 	public static $builtInValidators = array (
-		'required' => '\ci_ext\validators\RequiredValidator', 			// 必填
-		'filter' => '\ci_ext\validators\FilterValidator', 				// 过滤器
-		'match' => '\ci_ext\validators\RegularExpressionValidator', 	// 匹配正则
-		'email' => '\ci_ext\validators\EmailValidator', 				// 邮箱
-		'url' => '\ci_ext\validators\UrlValidator', 					// URL链接
-		'unique' => '\ci_ext\validators\UniqueValidator', 				// 是否唯一
-		'compare' => '\ci_ext\validators\CompareValidator', 			// 两个属性比较
-		'length' => '\ci_ext\validators\StringValidator', 				// 字符串
-		'in' => '\ci_ext\validators\RangeValidator',					// 区间
-	 	'numerical' => '\ci_ext\validators\NumberValidator', 			// 数值
-	 	'default' => '\ci_ext\validators\DefaultValueValidator', 		// 是否为默认数据
-	 	'boolean' => '\ci_ext\validators\BooleanValidator', 			// 是否为布尔值
-	 	'safe' => '\ci_ext\validators\SafeValidator', 					// 安全 
-	 	'unsafe' => '\ci_ext\validators\UnsafeValidator', 				// 非安全
-	 	//'date' => '\ci_ext\validators\DateValidator' 					// unsupport 日期
-	 	//'captcha' => '\ci_ext\validators\CaptchaValidator', 			// unsupport 验证码
-	 	//'type' => '\ci_ext\validators\TypeValidator', 				// unsupport 数据类型
-	 	//'file' => '\ci_ext\validators\FileValidator', 				// unsupport 文件上传
-	 	//'exist' => '\ci_ext\validators\ExistValidator', 				// unsupport 数据是否存在
-	);
+		'required' => '\ci_ext\validators\RequiredValidator', // 必填
+		'filter' => '\ci_ext\validators\FilterValidator', // 过滤器
+		'match' => '\ci_ext\validators\RegularExpressionValidator', // 匹配正则
+		'email' => '\ci_ext\validators\EmailValidator', // 邮箱
+		'url' => '\ci_ext\validators\UrlValidator', // URL链接
+		'unique' => '\ci_ext\validators\UniqueValidator', // 是否唯一
+		'compare' => '\ci_ext\validators\CompareValidator', // 两个属性比较
+		'length' => '\ci_ext\validators\StringValidator', // 字符串
+		'in' => '\ci_ext\validators\RangeValidator', // 区间
+		'numerical' => '\ci_ext\validators\NumberValidator', // 数值
+		'default' => '\ci_ext\validators\DefaultValueValidator', // 是否为默认数据
+		'boolean' => '\ci_ext\validators\BooleanValidator', // 是否为布尔值
+		'safe' => '\ci_ext\validators\SafeValidator', // 安全 
+		'unsafe' => '\ci_ext\validators\UnsafeValidator', // 非安全
+		'file' => '\ci_ext\validators\FileValidator', 				// 文件上传
+	)
+		//'date' => '\ci_ext\validators\DateValidator' 					// unsupport 日期
+		//'captcha' => '\ci_ext\validators\CaptchaValidator', 			// unsupport 验证码
+		//'type' => '\ci_ext\validators\TypeValidator', 				// unsupport 数据类型
+		//'exist' => '\ci_ext\validators\ExistValidator', 				// unsupport 数据是否存在
+	;
 	
 	public $attributes;
 	public $message;
@@ -240,7 +242,110 @@ class FileValidator extends Validator {
 	public $safe = false;
 	
 	protected function validateAttribute($object, $attribute) {
-		return true;
+		if ($this->maxFiles > 1) {
+			$files = $object->$attribute;
+			if (! is_array ( $files ) || ! isset ( $files [0] ) || ! $files [0] instanceof UploadedFile)
+				$files = UploadedFile::getInstances ( $object, $attribute );
+			if (array () === $files)
+				return $this->emptyAttribute ( $object, $attribute );
+			if (count ( $files ) > $this->maxFiles) {
+				$message = $this->tooMany !== null ? $this->tooMany : \CI_Ext::t('core', '{attribute} cannot accept more than {limit} files.' );
+				$this->addError ( $object, $attribute, $message, array ('{attribute}' => $attribute, '{limit}' => $this->maxFiles ) );
+			} else
+				foreach ( $files as $file )
+					$this->validateFile ( $object, $attribute, $file );
+		} else {
+			$file = $object->$attribute;
+			if (! $file instanceof UploadedFile) {
+				$file = UploadedFile::getInstance ( $object, $attribute );
+				if (null === $file)
+					return $this->emptyAttribute ( $object, $attribute );
+			}
+			$this->validateFile ( $object, $attribute, $file );
+		}
+	}
+	
+	protected function validateFile($object, $attribute, $file) {
+		if (null === $file || ($error = $file->getError ()) == UPLOAD_ERR_NO_FILE)
+			return $this->emptyAttribute ( $object, $attribute );
+		else if ($error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE || $this->maxSize !== null && $file->getSize () > $this->maxSize) {
+			$message = $this->tooLarge !== null ? $this->tooLarge : \CI_Ext::t('core', 'The file "{file}" is too large. Its size cannot exceed {limit} bytes.' );
+			$this->addError ( $object, $attribute, $message, array ('{file}' => $file->getName (), '{limit}' => $this->getSizeLimit () ) );
+		} else if ($error == UPLOAD_ERR_PARTIAL)
+			throw new Exception ( \CI_Ext::t('core', 'The file "{file}" was only partially uploaded.', array ('{file}' => $file->getName () ) ) );
+		else if ($error == UPLOAD_ERR_NO_TMP_DIR)
+			throw new Exception ( \CI_Ext::t('core', 'Missing the temporary folder to store the uploaded file "{file}".', array ('{file}' => $file->getName () ) ) );
+		else if ($error == UPLOAD_ERR_CANT_WRITE)
+			throw new Exception ( \CI_Ext::t('core', 'Failed to write the uploaded file "{file}" to disk.', array ('{file}' => $file->getName () ) ) );
+		else if (defined ( 'UPLOAD_ERR_EXTENSION' ) && $error == UPLOAD_ERR_EXTENSION) // available for PHP 5.2.0 or above
+			throw new Exception ( \CI_Ext::t('core', 'File upload was stopped by extension.' ) );
+		
+		if ($this->minSize !== null && $file->getSize () < $this->minSize) {
+			$message = $this->tooSmall !== null ? $this->tooSmall : \CI_Ext::t('core', 'The file "{file}" is too small. Its size cannot be smaller than {limit} bytes.' );
+			$this->addError ( $object, $attribute, $message, array ('{file}' => $file->getName (), '{limit}' => $this->minSize ) );
+		}
+		
+		if ($this->types !== null) {
+			if (is_string ( $this->types ))
+				$types = preg_split ( '/[\s,]+/', strtolower ( $this->types ), - 1, PREG_SPLIT_NO_EMPTY );
+			else
+				$types = $this->types;
+			if (! in_array ( strtolower ( $file->getExtensionName () ), $types )) {
+				$message = $this->wrongType !== null ? $this->wrongType : \CI_Ext::t('core', 'The file "{file}" cannot be uploaded. Only files with these extensions are allowed: {extensions}.' );
+				$this->addError ( $object, $attribute, $message, array ('{file}' => $file->getName (), '{extensions}' => implode ( ', ', $types ) ) );
+			}
+		}
+		
+		if ($this->mimeTypes !== null) {
+			if (function_exists ( 'finfo_open' )) {
+				$mimeType = false;
+				if (($info = finfo_open ( defined ( 'FILEINFO_MIME_TYPE' ) ? FILEINFO_MIME_TYPE : FILEINFO_MIME ))!==false)
+					$mimeType = finfo_file ( $info, $file->getTempName () );
+			} else if (function_exists ( 'mime_content_type' ))
+				$mimeType = mime_content_type ( $file->getTempName () );
+			else
+				throw new Exception ( \CI_Ext::t('core', 'In order to use MIME-type validation provided by CFileValidator fileinfo PECL extension should be installed.' ) );
+			
+			if (is_string ( $this->mimeTypes ))
+				$mimeTypes = preg_split ( '/[\s,]+/', strtolower ( $this->mimeTypes ), - 1, PREG_SPLIT_NO_EMPTY );
+			else
+				$mimeTypes = $this->mimeTypes;
+			
+			if ($mimeType === false || ! in_array ( strtolower ( $mimeType ), $mimeTypes )) {
+				$message = $this->wrongMimeType !== null ? $this->wrongMimeType : \CI_Ext::t('core', 'The file "{file}" cannot be uploaded. Only files of these MIME-types are allowed: {mimeTypes}.' );
+				$this->addError ( $object, $attribute, $message, array ('{file}' => $file->getName (), '{mimeTypes}' => implode ( ', ', $mimeTypes ) ) );
+			}
+		}
+	}
+	
+	protected function emptyAttribute($object, $attribute) {
+		if (! $this->allowEmpty) {
+			$message = $this->message !== null ? $this->message : \CI_Ext::t('core', '{attribute} cannot be blank.' );
+			$this->addError ( $object, $attribute, $message );
+		}
+	}
+	
+	protected function getSizeLimit() {
+		$limit = ini_get ( 'upload_max_filesize' );
+		$limit = $this->sizeToBytes ( $limit );
+		if ($this->maxSize !== null && $limit > 0 && $this->maxSize < $limit)
+			$limit = $this->maxSize;
+		if (isset ( $_POST ['MAX_FILE_SIZE'] ) && $_POST ['MAX_FILE_SIZE'] > 0 && $_POST ['MAX_FILE_SIZE'] < $limit)
+			$limit = $_POST ['MAX_FILE_SIZE'];
+		return $limit;
+	}
+	public function sizeToBytes($sizeStr) {
+		// get the latest character
+		switch (strtolower ( substr ( $sizeStr, - 1 ) )) {
+			case 'm' :
+				return ( int ) $sizeStr * 1048576; // 1024 * 1024
+			case 'k' :
+				return ( int ) $sizeStr * 1024; // 1024
+			case 'g' :
+				return ( int ) $sizeStr * 1073741824; // 1024 * 1024 * 1024
+			default :
+				return ( int ) $sizeStr; // do nothing
+		}
 	}
 }
 class FilterValidator extends Validator {

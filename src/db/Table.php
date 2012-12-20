@@ -2,8 +2,6 @@
 
 namespace ci_ext\db;
 
-use ci_ext\utils\VarDumper;
-
 use ci_ext\core\Exception;
 use ci_ext\events\Event;
 use ci_ext\validators\Validator;
