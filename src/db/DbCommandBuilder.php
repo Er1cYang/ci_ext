@@ -22,7 +22,9 @@ class DbCommandBuilder extends \ci_ext\core\Object {
 	}
 
 	public function getLastInsertID($table) {
-		return $this->getDbConnection()->insert_id();
+		$sql = 'select LAST_INSERT_ID()';
+		$result = $this->getDbConnection()->query($sql)->result('array');
+		return $result[0]['LAST_INSERT_ID()'];
 	}
 	
 	public function quoteTableName($name) {

@@ -58,7 +58,8 @@ class GridView extends \ci_ext\web\Widget {
 </div>
 TEMPLATE;
 		
-		$this->_ci->registerScript('cie-gridview-'.$this->id, "$('#{$this->id}').cieGridview();");
+		$url = get_instance()->getCurrentUrl();
+		$this->_ci->registerScript('cie-gridview-'.$this->id, "$('#{$this->id}').cieGridview({url: '{$url}'});");
 		
 		echo $template;
 		

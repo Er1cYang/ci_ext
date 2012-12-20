@@ -25,6 +25,7 @@
 			this.element = $element;
 			this.config = config;
 			this.init();
+			this._e = {};
 		},
 		
 		init: function() {
@@ -34,6 +35,21 @@
 				that.update({url: this.href})
 				return false;
 			});
+		},
+		
+		addEventListener: function(type, callback) {
+			if(!this._e[type]) {
+				this._e[type] = new Array();
+			}
+			this._e[type].push(callback);
+		},
+		
+		dispathEvent: function(type) {
+			if(this._e[type]) {
+				for(i=0; i<this._e[type].length; ++i) {
+					this._e[type][i](this);
+				}
+			}
 		},
 		
 		getSelectedValue: function() {
@@ -63,9 +79,11 @@
 			options = $.extend({
 				url: this.config.url,
 				type: 'GET',
+				data: {_c: new Date().getTime()},
 				success: function(data) {
 					var $data = $('<div>' + data + '</div>');
 					that.element.html($(that.id, $data).html());
+					that.dispathEvent('onUpdateSuccess');
 				},
 				error: function (XHR, textStatus, errorThrown) {
 					var err;
@@ -89,8 +107,8 @@
 					}
 					alert(err);
 				}
-			}, options);
-			$.ajax(options, options || {});
+			}, options || {});
+			$.ajax(options);
 		}
 	}
 	
