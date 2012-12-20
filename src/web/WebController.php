@@ -1,6 +1,8 @@
 <?php
 namespace ci_ext\web;
 
+use ci_ext\web\helpers\Html;
+
 use ci_ext\core\Exception;
 
 use ci_ext\utils\HashMap;
@@ -8,7 +10,7 @@ use ci_ext\utils\HashMap;
 use ci_ext\utils\ArrayList;
 use ci_ext\utils\FileHelper;
 /**
- * WebController
+ * CI_E_Controller
  * ==============================================
  * File encoding: UTF-8 
  * ----------------------------------------------
@@ -61,6 +63,22 @@ class WebController extends \CI_Controller {
 	public function getSiteUrl($uri='') {
 		return site_url($uri);
 	}
+	
+	/**
+	 * 判断当前请求是否是AJAX
+	 * @return boolean
+	 */
+	public function isAjaxRequest() {
+		return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH']==='XMLHttpRequest';
+	}
+	
+	/**
+	 * 判断当前请求是否是POST
+	 * @return boolean
+	 */
+	public function isPostRequest(){
+    	return isset($_SERVER['REQUEST_METHOD']) && !strcasecmp($_SERVER['REQUEST_METHOD'],'POST');
+	} 
 	
 	/**
 	 * 跳转
@@ -150,6 +168,9 @@ class WebController extends \CI_Controller {
 	 * @return void
 	 */
 	public function registerCssFile($file) {
+		if($this->isAjaxRequest()) {
+			echo Html::tag('link', array('class'=>'cie-auto-registed', 'href'=>$file, 'type'=>'text/css', 'rel'=>'stylesheet'), null, false)."\n";
+		} 
 		if(!$this->_cssFiles->contain($file)) {
 			$this->_cssFiles->push($file);
 		}
@@ -161,6 +182,9 @@ class WebController extends \CI_Controller {
 	 * @return void
 	 */
 	public function registerJsFile($file) {
+		if($this->isAjaxRequest()) {
+			echo Html::tag('script', array('class'=>'cie-auto-registed', 'type'=>'text/javascript', 'src'=>$file), '', true)."\n";
+		}
 		if(!$this->_jsFiles->contain($file)) {
 			$this->_jsFiles->push($file);
 		}
@@ -174,6 +198,10 @@ class WebController extends \CI_Controller {
 	 * @return void
 	 */
 	public function registerScript($id, $script, $position=null) {
+		if($this->isAjaxRequest()) {
+			$script = "\n$().ready(function() {\n{$script}\n});\n";
+			echo Html::tag('script', array('class'=>'cie-auto-registed', 'type'=>'text/javascript'), $script, true);
+		}
 		if(!$this->_js->contains($id)) {
 			$this->_js->add($id, $script);
 		}
@@ -237,6 +265,15 @@ class WebController extends \CI_Controller {
 	}
 	
 	/**
+	 * 去除自动渲染的asset内容
+	 * @param string $output
+	 */
+	protected function stripAutoRegistedContents(&$output) {
+		$output = preg_replace('/<link class="cie-auto-registed" href=".*" type="text\/css" rel="stylesheet">/is', '', $output);
+		$output = preg_replace('/<script class="cie-auto-registed".*?<\/script>/is', '', $output);
+	}
+	
+	/**
 	 * 渲染头部js、css文件
 	 * @param string $output
 	 * @return void
@@ -245,6 +282,7 @@ class WebController extends \CI_Controller {
 		$count=0;
 		$output=preg_replace('/(<title\b[^>]*>|<\\/head\s*>)/is','<###head###>$1',$output,1,$count);
 		if($count) {
+			$this->stripAutoRegistedContents($output);
 			$assetHtml = '';
 			foreach($this->_cssFiles as $one) {
 				$assetHtml .= "<link href='{$one}' type='text/css' rel='stylesheet' />\n";
@@ -265,6 +303,7 @@ class WebController extends \CI_Controller {
 	protected function renderFooterAssets(&$output) {
 		$output=preg_replace('/(<\\/body\s*>)/is','<###end###>$1',$output,1,$fullPage);
 		if($fullPage) {
+			$this->stripAutoRegistedContents($output);
 			$assetHtml = '<script type="text/javascript">'."\n";
 			foreach($this->_js as $block) {
 				$assetHtml .= $block."\n";
