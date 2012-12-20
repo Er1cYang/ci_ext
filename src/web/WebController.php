@@ -269,7 +269,7 @@ class WebController extends \CI_Controller {
 	 * @param string $output
 	 */
 	protected function stripAutoRegistedContents(&$output) {
-		$output = preg_replace('/<link class="cie-auto-registed" href=".*" type="text\/css" rel="stylesheet">/is', '', $output);
+		$output = preg_replace('/<link class="cie-auto-registed" href=".*?" type="text\/css" rel="stylesheet">/is', '', $output);
 		$output = preg_replace('/<script class="cie-auto-registed".*?<\/script>/is', '', $output);
 	}
 	
