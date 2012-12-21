@@ -2,15 +2,12 @@
 namespace ci_ext\web;
 
 use ci_ext\web\helpers\Html;
-
 use ci_ext\core\Exception;
-
 use ci_ext\utils\HashMap;
-
 use ci_ext\utils\ArrayList;
 use ci_ext\utils\FileHelper;
 /**
- * CI_E_Controller
+ * WebController
  * ==============================================
  * File encoding: UTF-8 
  * ----------------------------------------------
