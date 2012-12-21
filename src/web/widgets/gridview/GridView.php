@@ -2,8 +2,8 @@
 namespace ci_ext\web\widgets\gridview;
 
 use ci_ext\utils\VarDumper;
-
 use ci_ext\web\helpers\Html;
+use ci_ext\utils\Formatter;
 
 class GridView extends \ci_ext\web\Widget {
 	
@@ -23,6 +23,7 @@ class GridView extends \ci_ext\web\Widget {
 	public $sort;
 	public $selectableRows=1;
 	public $rowCssClass=array('odd', 'even');
+	private $_formatter = null;
 	
 	public function __construct() {
 		$this->_ci =& \get_instance();
@@ -31,6 +32,13 @@ class GridView extends \ci_ext\web\Widget {
 		if($this->cssFile) {
 			$this->_ci->registerCssFile($this->cssFile);
 		}
+	}
+	
+	public function getFormatter() {
+		if(!$this->_formatter) {
+			$this->_formatter = new Formatter();
+		}
+		return $this->_formatter;
 	}
 	
 	public function init() {

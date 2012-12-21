@@ -39,7 +39,7 @@ class DataColumn extends GridColumn {
 			$value = $this->evaluateExpression ( $this->value, array ('data' => $data, 'row' => $row ) );
 		else if ($this->name !== null)
 			$value = Html::value ( $data, $this->name );
-		echo $value === null ? $this->grid->nullDisplay : $value;
+		echo $value === null ? $this->grid->nullDisplay : $this->grid->getFormatter()->format($value,$this->type);
 	}
 }
 
